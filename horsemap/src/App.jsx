@@ -7,26 +7,31 @@ import ListView from './components/ListView'
 import DetailPanel from './components/DetailPanel'
 import AuthPage from './pages/AuthPage'
 import ProfilePage from './pages/ProfilePage'
-import { useAuth } from './hooks/useAuth'
-import providers from './data/providers.json'
+import { useAuth } from './hooks/useAuth.jsx'
+import { useDynamicProviders } from './hooks/useDynamicProviders.jsx'
+import staticProviders from './data/providers.json'
 import './index.css'
 
 const CATEGORIES = ['Alle', 'Pferdeklinik', 'Tierarzt', 'Hufschmied', 'Sattler', 'Reha / Therapie', 'Trainer', 'Spezialangebot', 'Mobiler Notdienst', 'Notfall-Netzwerk']
 
 function MapApp() {
   const { user } = useAuth()
+  const { activeDynamic } = useDynamicProviders()
   const [activeCategory, setActiveCategory] = useState('Alle')
   const [onlyEmergency, setOnlyEmergency] = useState(false)
   const [view, setView] = useState('map')
   const [selected, setSelected] = useState(null)
   const [search, setSearch] = useState('')
 
-  const filtered = providers.filter(p => {
+  // Merge static + dynamic providers
+  const allProviders = [...staticProviders, ...activeDynamic]
+
+  const filtered = allProviders.filter(p => {
     const matchCat = activeCategory === 'Alle' || p.category === activeCategory
     const matchEmergency = !onlyEmergency || p.is_emergency
     const matchSearch = !search ||
       p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.city.toLowerCase().includes(search.toLowerCase())
+      (p.city || '').toLowerCase().includes(search.toLowerCase())
     return matchCat && matchEmergency && matchSearch
   })
 

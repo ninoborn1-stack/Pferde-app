@@ -6,16 +6,19 @@ import { MARKER_SVG } from './icons'
 
 const gold = '#C9A84C'
 
-function createIcon(isEmergency, is24h, isSelected) {
-  const bg = isEmergency ? '#E53E3E' : is24h ? '#E67E22' : gold
+function createIcon(isEmergency, is24h, isSelected, isDynamic, isTemporary) {
+  const bg = isTemporary ? '#7B2FBE' : isDynamic ? '#1a7a4a' : isEmergency ? '#E53E3E' : is24h ? '#E67E22' : gold
   const size = isSelected ? 40 : 32
   const ringStyle = isSelected
     ? `box-shadow: 0 0 0 3px white, 0 0 0 5px ${bg}, 0 4px 16px rgba(0,0,0,0.4);`
     : `box-shadow: 0 2px 8px rgba(0,0,0,0.35);`
-  const svg = isEmergency ? MARKER_SVG.emergency : is24h ? MARKER_SVG.clock : MARKER_SVG.horse
+  const svg = isTemporary ? MARKER_SVG.clock : isDynamic ? MARKER_SVG.horse : isEmergency ? MARKER_SVG.emergency : is24h ? MARKER_SVG.clock : MARKER_SVG.horse
+  // Pulse ring for live/temporary markers
+  const pulse = (isDynamic || isTemporary)
+    ? `<div style="position:absolute;inset:-5px;border-radius:50%;border:2px solid ${bg};opacity:0.5;animation:pulse 2s infinite;"></div>` : ''
 
   return L.divIcon({
-    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};border:2.5px solid white;display:flex;align-items:center;justify-content:center;${ringStyle}cursor:pointer;">${svg}</div>`,
+    html: `<div style="position:relative;width:${size}px;height:${size}px;">${pulse}<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};border:2.5px solid white;display:flex;align-items:center;justify-content:center;${ringStyle}cursor:pointer;">${svg}</div></div>`,
     className: '',
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
@@ -136,7 +139,7 @@ export default function MapView({ providers, selected, onSelect }) {
           <Marker
             key={p.id}
             position={[p.lat, p.lng]}
-            icon={createIcon(p.is_emergency, p.is_24h, selected?.id === p.id)}
+            icon={createIcon(p.is_emergency, p.is_24h, selected?.id === p.id, p.isDynamic, p.isTemporary)}
             eventHandlers={{ click: () => onSelect(p) }}
           >
             <Popup>

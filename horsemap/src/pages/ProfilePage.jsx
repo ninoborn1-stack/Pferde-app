@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.jsx'
+import { useDynamicProviders } from '../hooks/useDynamicProviders.jsx'
 import { HorseshoeIcon } from '../components/icons'
 
 const gold = '#C9A84C'
@@ -9,11 +10,70 @@ const red = '#8B1A1A'
 export default function ProfilePage() {
   const navigate = useNavigate()
   const { user, logout, updateUser } = useAuth()
+  const { services, slots, addService, updateService, removeService, toggleService, addSlot, removeSlot } = useDynamicProviders()
+  const myService = services.find(s => s.ownerId === user?.id)
+  const mySlots = slots.filter(s => s.ownerId === user?.id)
+
   const [activeTab, setActiveTab] = useState('uebersicht')
   const [editBio, setEditBio] = useState(false)
   const [bioInput, setBioInput] = useState(user?.bio || '')
   const [showAddHorse, setShowAddHorse] = useState(false)
   const [horseForm, setHorseForm] = useState({ name: '', breed: '', age: '', color: '' })
+
+  // Service form state
+  const CATEGORIES = ['Hufschmied', 'Tierarzt', 'Sattler', 'Reha / Therapie', 'Trainer', 'Spezialangebot', 'Mobiler Notdienst']
+  const [showServiceForm, setShowServiceForm] = useState(false)
+  const [serviceForm, setServiceForm] = useState({
+    name: myService?.name || '',
+    category: myService?.category || 'Hufschmied',
+    address: myService?.address || '',
+    city: myService?.city || '',
+    lat: myService?.lat || '',
+    lng: myService?.lng || '',
+    phone: myService?.phone || '',
+    website: myService?.website || '',
+    specialization: myService?.specialization || '',
+    notes: myService?.notes || '',
+  })
+  const setSvc = (f, v) => setServiceForm(s => ({ ...s, [f]: v }))
+
+  // Slot form state
+  const [showSlotForm, setShowSlotForm] = useState(false)
+  const today = new Date().toISOString().split('T')[0]
+  const [slotForm, setSlotForm] = useState({ date: today, timeFrom: '09:00', timeTo: '17:00', note: '', mobile_service: false })
+  const setSlotF = (f, v) => setSlotForm(s => ({ ...s, [f]: v }))
+
+  const saveService = () => {
+    const data = {
+      ...serviceForm,
+      lat: parseFloat(serviceForm.lat) || 52.52,
+      lng: parseFloat(serviceForm.lng) || 13.4,
+      ownerId: user.id,
+      ownerName: user.name,
+    }
+    if (myService) updateService(myService.id, data)
+    else addService(data)
+    setShowServiceForm(false)
+  }
+
+  const saveSlot = () => {
+    if (!myService && !serviceForm.name) return
+    addSlot({
+      ...slotForm,
+      ownerId: user.id,
+      name: myService?.name || user.name,
+      category: myService?.category || 'Dienstleister',
+      address: myService?.address || '',
+      city: myService?.city || user.region,
+      lat: myService?.lat || 52.52,
+      lng: myService?.lng || 13.4,
+      phone: myService?.phone || '',
+      specialization: myService?.specialization || '',
+      opening_hours: `${slotForm.timeFrom}–${slotForm.timeTo}`,
+    })
+    setSlotForm({ date: today, timeFrom: '09:00', timeTo: '17:00', note: '', mobile_service: false })
+    setShowSlotForm(false)
+  }
 
   if (!user) {
     navigate('/auth')
@@ -46,6 +106,7 @@ export default function ProfilePage() {
 
   const tabs = [
     { id: 'uebersicht', label: 'Übersicht' },
+    ...(user.type === 'Dienstleister' ? [{ id: 'mein-dienst', label: myService ? '🟢 Mein Dienst' : '➕ Mein Dienst' }] : []),
     { id: 'pferde', label: `Meine Pferde${user.horses?.length ? ` (${user.horses.length})` : ''}` },
     { id: 'community', label: 'Community' },
     { id: 'einstellungen', label: 'Einstellungen' },
@@ -358,6 +419,190 @@ export default function ProfilePage() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* MEIN DIENST */}
+        {activeTab === 'mein-dienst' && (
+          <div>
+            {/* Service Listing */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>Mein Dienst auf der Karte</h2>
+              {!showServiceForm && (
+                <button onClick={() => setShowServiceForm(true)} style={primaryBtnSmall}>
+                  {myService ? 'Bearbeiten' : '+ Dienst eintragen'}
+                </button>
+              )}
+            </div>
+
+            {/* Service form */}
+            {showServiceForm && (
+              <div style={{ ...cardStyle, marginBottom: 20, border: '1px solid rgba(201,168,76,0.3)' }}>
+                <div style={{ ...sectionTitle, marginBottom: 18 }}>Dienstleister-Eintrag</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <label style={labelStyle}>Anzeigename *</label>
+                    <input value={serviceForm.name} onChange={e => setSvc('name', e.target.value)} placeholder="z. B. Max Müller – Hufschmied" style={formInput} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Kategorie</label>
+                    <select value={serviceForm.category} onChange={e => setSvc('category', e.target.value)} style={formInput}>
+                      {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Stadt</label>
+                    <input value={serviceForm.city} onChange={e => setSvc('city', e.target.value)} placeholder="Berlin" style={formInput} />
+                  </div>
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <label style={labelStyle}>Adresse</label>
+                    <input value={serviceForm.address} onChange={e => setSvc('address', e.target.value)} placeholder="Musterstraße 1, 10115 Berlin" style={formInput} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Breitengrad (lat)</label>
+                    <input value={serviceForm.lat} onChange={e => setSvc('lat', e.target.value)} placeholder="52.5200" style={formInput} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Längengrad (lng)</label>
+                    <input value={serviceForm.lng} onChange={e => setSvc('lng', e.target.value)} placeholder="13.4050" style={formInput} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Telefon</label>
+                    <input value={serviceForm.phone} onChange={e => setSvc('phone', e.target.value)} placeholder="+49 30 ..." style={formInput} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Website</label>
+                    <input value={serviceForm.website} onChange={e => setSvc('website', e.target.value)} placeholder="https://..." style={formInput} />
+                  </div>
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <label style={labelStyle}>Spezialisierung</label>
+                    <input value={serviceForm.specialization} onChange={e => setSvc('specialization', e.target.value)} placeholder="z. B. Hufbeschlag, Hufkorrektur" style={formInput} />
+                  </div>
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <label style={labelStyle}>Hinweise</label>
+                    <textarea value={serviceForm.notes} onChange={e => setSvc('notes', e.target.value)} placeholder="Kurze Beschreibung..." rows={2} style={{ ...formInput, resize: 'none' }} />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+                  <button onClick={saveService} style={primaryBtnSmall}>Auf Karte veröffentlichen</button>
+                  <button onClick={() => setShowServiceForm(false)} style={ghostBtn}>Abbrechen</button>
+                  {myService && <button onClick={() => { removeService(myService.id); setShowServiceForm(false) }} style={{ ...ghostBtn, color: '#ff9999', borderColor: 'rgba(255,100,100,0.2)' }}>Eintrag löschen</button>}
+                </div>
+              </div>
+            )}
+
+            {/* Current listing */}
+            {myService && !showServiceForm && (
+              <div style={{ ...cardStyle, border: myService.isLive ? '1px solid rgba(74,158,110,0.4)' : '1px solid rgba(255,255,255,0.07)', marginBottom: 24 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                      <span style={{ fontSize: 16, fontWeight: 700 }}>{myService.name}</span>
+                      <span style={{
+                        fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20,
+                        background: myService.isLive ? 'rgba(74,158,110,0.2)' : 'rgba(255,255,255,0.08)',
+                        color: myService.isLive ? '#6fcf97' : 'rgba(255,255,255,0.4)',
+                      }}>
+                        {myService.isLive ? '● Live auf Karte' : '○ Versteckt'}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginBottom: 4 }}>{myService.category} · {myService.city}</div>
+                    {myService.specialization && <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>{myService.specialization}</div>}
+                  </div>
+                  <button onClick={() => toggleService(myService.id)} style={{
+                    ...ghostBtn,
+                    color: myService.isLive ? '#ff9999' : '#6fcf97',
+                    borderColor: myService.isLive ? 'rgba(255,100,100,0.2)' : 'rgba(111,207,151,0.2)',
+                    fontSize: 12,
+                  }}>
+                    {myService.isLive ? 'Ausblenden' : 'Aktivieren'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Temporary slots */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Temporäre Verfügbarkeit</div>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>
+                  Zeige für einen bestimmten Zeitraum an, wann und wo du verfügbar bist.
+                </div>
+              </div>
+              {!showSlotForm && myService && (
+                <button onClick={() => setShowSlotForm(true)} style={primaryBtnSmall}>+ Termin einstellen</button>
+              )}
+              {!myService && !showServiceForm && (
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>Erst Dienst eintragen</span>
+              )}
+            </div>
+
+            {showSlotForm && (
+              <div style={{ ...cardStyle, marginBottom: 20, border: '1px solid rgba(201,168,76,0.25)' }}>
+                <div style={{ ...sectionTitle, marginBottom: 16 }}>Neuer Verfügbarkeits-Termin</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label style={labelStyle}>Datum</label>
+                    <input type="date" value={slotForm.date} onChange={e => setSlotF('date', e.target.value)} style={formInput} min={today} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Von</label>
+                    <input type="time" value={slotForm.timeFrom} onChange={e => setSlotF('timeFrom', e.target.value)} style={formInput} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Bis</label>
+                    <input type="time" value={slotForm.timeTo} onChange={e => setSlotF('timeTo', e.target.value)} style={formInput} />
+                  </div>
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <label style={labelStyle}>Notiz (optional)</label>
+                    <input value={slotForm.note} onChange={e => setSlotF('note', e.target.value)} placeholder="z. B. Nur Hufpflege, kein Beschlag" style={formInput} />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 22 }}>
+                    <input type="checkbox" id="mobile" checked={slotForm.mobile_service} onChange={e => setSlotF('mobile_service', e.target.checked)} style={{ accentColor: '#C9A84C', width: 15, height: 15 }} />
+                    <label htmlFor="mobile" style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>Mobiler Einsatz</label>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+                  <button onClick={saveSlot} style={primaryBtnSmall}>Termin veröffentlichen</button>
+                  <button onClick={() => setShowSlotForm(false)} style={ghostBtn}>Abbrechen</button>
+                </div>
+              </div>
+            )}
+
+            {/* Active slots list */}
+            {mySlots.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {mySlots.map(slot => {
+                  const expires = new Date(slot.activeUntil)
+                  const isToday = expires.toDateString() === new Date().toDateString()
+                  return (
+                    <div key={slot.id} style={{ ...cardStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(201,168,76,0.15)', color: gold }}>
+                            ● Live
+                          </span>
+                          <span style={{ fontSize: 14, fontWeight: 600 }}>
+                            {slot.date} · {slot.opening_hours}
+                          </span>
+                        </div>
+                        {slot.note && <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>{slot.note}</div>}
+                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 4 }}>
+                          Läuft ab: {expires.toLocaleString('de-DE')}
+                        </div>
+                      </div>
+                      <button onClick={() => removeSlot(slot.id)} style={{ ...ghostBtn, color: '#ff9999', borderColor: 'rgba(255,100,100,0.2)' }}>
+                        Entfernen
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '40px 20px', color: 'rgba(255,255,255,0.2)', fontSize: 14 }}>
+                Noch keine aktiven Termine.
+              </div>
+            )}
           </div>
         )}
 

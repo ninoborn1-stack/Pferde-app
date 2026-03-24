@@ -92,6 +92,8 @@ export default function ListView({ providers, selected, onSelect }) {
                   <CatIcon size={10} />
                   {p.category}
                 </span>
+                {p.isTemporary && <Badge color="#A855F7" bg="rgba(168,85,247,0.1)" border="rgba(168,85,247,0.25)" Icon={Clock} label="● Live-Termin" />}
+                {p.isDynamic && !p.isTemporary && <Badge color="#22c55e" bg="rgba(34,197,94,0.1)" border="rgba(34,197,94,0.25)" Icon={null} label="● Neu eingetragen" />}
                 {p.is_emergency && <Badge color="#FF5555" bg="rgba(255,85,85,0.1)" border="rgba(255,85,85,0.2)" Icon={AlertOctagon} label="Notfall" />}
                 {p.is_24h && <Badge color="#E67E22" bg="rgba(230,126,34,0.1)" border="rgba(230,126,34,0.2)" Icon={Clock} label="24/7" />}
                 {p.mobile_service && <Badge color="#27AE60" bg="rgba(39,174,96,0.1)" border="rgba(39,174,96,0.2)" Icon={Truck} label="Mobil" />}
