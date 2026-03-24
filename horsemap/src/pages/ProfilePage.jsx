@@ -115,7 +115,7 @@ export default function ProfilePage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#0f0a0a',
+      background: '#000000',
       fontFamily: 'system-ui, -apple-system, sans-serif',
       color: 'white',
     }}>
@@ -224,7 +224,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Content */}
-      <div style={{ maxWidth: 860, margin: '0 auto', padding: '28px 24px', minHeight: '100vh', background: '#0f0a0a' }}>
+      <div style={{ maxWidth: 860, margin: '0 auto', padding: '28px 24px', minHeight: '100vh', background: '#000000' }}>
 
         {/* ÜBERSICHT */}
         {activeTab === 'uebersicht' && (
