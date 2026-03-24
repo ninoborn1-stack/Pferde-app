@@ -35,26 +35,25 @@ function TrackpadHandler() {
   const map = useMap()
   useEffect(() => {
     const container = map.getContainer()
+
     const onWheel = (e) => {
       e.preventDefault()
+      e.stopPropagation()
 
-      // ctrlKey = pinch-to-zoom on trackpad (macOS sends this for pinch)
+      // macOS pinch-to-zoom sends wheel events with ctrlKey=true
       if (e.ctrlKey) {
-        const delta = -e.deltaY / 100
-        map.setZoom(map.getZoom() + delta, { animate: false })
+        const currentZoom = map.getZoom()
+        const delta = -e.deltaY * 0.05
+        map.setZoom(currentZoom + delta, { animate: true, duration: 0.1 })
         return
       }
 
-      // Primarily horizontal swipe OR diagonal → pan
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY) * 0.3) {
-        map.panBy([e.deltaX, e.deltaY], { animate: false })
-        return
+      // Horizontal swipe or diagonal → pan
+      if (Math.abs(e.deltaX) > 2 || Math.abs(e.deltaY) > 2) {
+        map.panBy([e.deltaX * 1.2, e.deltaY * 1.2], { animate: false })
       }
-
-      // Pure vertical scroll → zoom (mouse wheel or trackpad vertical)
-      const zoomDelta = e.deltaMode === 1 ? -e.deltaY * 0.5 : -e.deltaY / 100
-      map.setZoom(map.getZoom() + zoomDelta, { animate: false })
     }
+
     container.addEventListener('wheel', onWheel, { passive: false })
     return () => container.removeEventListener('wheel', onWheel)
   }, [map])
@@ -124,7 +123,7 @@ export default function MapView({ providers, selected, onSelect }) {
         dragging={true}
         touchZoom={true}
         scrollWheelZoom={false}
-        doubleClickZoom={true}
+        doubleClickZoom={false}
         boxZoom={true}
       >
         <TileLayer
