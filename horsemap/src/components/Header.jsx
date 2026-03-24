@@ -1,9 +1,11 @@
-import { Map, List, Search } from 'lucide-react'
+import { Map, List, Search, User } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { HorseshoeIcon } from './icons'
 
 const gold = '#C9A84C'
 
-export default function Header({ view, setView, search, setSearch }) {
+export default function Header({ view, setView, search, setSearch, user }) {
+  const navigate = useNavigate()
   return (
     <header style={{
       background: 'linear-gradient(135deg, #6B0E0E 0%, #8B1A1A 50%, #7A1010 100%)',
@@ -91,6 +93,27 @@ export default function Header({ view, setView, search, setSearch }) {
       </div>
 
       <div style={{ flex: 1 }} />
+
+      {/* Profile button */}
+      <button
+        onClick={() => navigate(user ? '/profil' : '/auth')}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 7,
+          padding: '5px 14px',
+          borderRadius: 10,
+          border: `1px solid ${user ? 'rgba(201,168,76,0.4)' : 'rgba(255,255,255,0.1)'}`,
+          background: user ? 'rgba(201,168,76,0.1)' : 'rgba(255,255,255,0.06)',
+          color: user ? gold : 'rgba(255,255,255,0.55)',
+          fontSize: 13,
+          fontWeight: 600,
+          cursor: 'pointer',
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          transition: 'all 0.18s',
+        }}
+      >
+        <User size={13} />
+        {user ? user.name.split(' ')[0] : 'Anmelden'}
+      </button>
 
       {/* View toggle */}
       <div style={{

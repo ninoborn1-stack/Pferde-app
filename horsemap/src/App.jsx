@@ -1,15 +1,20 @@
 import { useState } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
 import FilterBar from './components/FilterBar'
 import MapView from './components/MapView'
 import ListView from './components/ListView'
 import DetailPanel from './components/DetailPanel'
+import AuthPage from './pages/AuthPage'
+import ProfilePage from './pages/ProfilePage'
+import { useAuth } from './hooks/useAuth'
 import providers from './data/providers.json'
 import './index.css'
 
 const CATEGORIES = ['Alle', 'Pferdeklinik', 'Tierarzt', 'Hufschmied', 'Sattler', 'Reha / Therapie', 'Trainer', 'Spezialangebot', 'Mobiler Notdienst', 'Notfall-Netzwerk']
 
-export default function App() {
+function MapApp() {
+  const { user } = useAuth()
   const [activeCategory, setActiveCategory] = useState('Alle')
   const [onlyEmergency, setOnlyEmergency] = useState(false)
   const [view, setView] = useState('map')
@@ -27,7 +32,7 @@ export default function App() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#FAFAF8' }}>
-      <Header view={view} setView={setView} search={search} setSearch={setSearch} />
+      <Header view={view} setView={setView} search={search} setSearch={setSearch} user={user} />
       <FilterBar
         categories={CATEGORIES}
         active={activeCategory}
@@ -47,5 +52,17 @@ export default function App() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter basename="/Pferde-app">
+      <Routes>
+        <Route path="/" element={<MapApp />} />
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/profil" element={<ProfilePage />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
