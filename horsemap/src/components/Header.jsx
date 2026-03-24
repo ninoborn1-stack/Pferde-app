@@ -1,7 +1,7 @@
 import { Map, List, Search } from 'lucide-react'
+import { HorseshoeIcon } from './icons'
 
 const gold = '#C9A84C'
-const red = '#8B1A1A'
 
 export default function Header({ view, setView, search, setSearch }) {
   return (
@@ -19,16 +19,17 @@ export default function Header({ view, setView, search, setSearch }) {
       {/* Logo */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginRight: 4 }}>
         <div style={{
-          width: 34,
-          height: 34,
+          width: 36,
+          height: 36,
           borderRadius: 10,
           background: 'rgba(201,168,76,0.15)',
-          border: '1px solid rgba(201,168,76,0.4)',
+          border: '1px solid rgba(201,168,76,0.35)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: 18,
-        }}>🐴</div>
+        }}>
+          <HorseshoeIcon size={20} color={gold} />
+        </div>
         <div>
           <div style={{
             fontSize: 17,
@@ -60,7 +61,6 @@ export default function Header({ view, setView, search, setSearch }) {
         padding: '0 12px',
         border: '1px solid rgba(255,255,255,0.12)',
         backdropFilter: 'blur(8px)',
-        transition: 'border-color 0.2s',
       }}>
         <Search size={13} color="rgba(255,255,255,0.4)" style={{ flexShrink: 0 }} />
         <input
@@ -82,7 +82,8 @@ export default function Header({ view, setView, search, setSearch }) {
           <button
             onClick={() => setSearch('')}
             style={{
-              background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)',
+              background: 'none', border: 'none',
+              color: 'rgba(255,255,255,0.4)',
               cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: 0,
             }}
           >×</button>
@@ -91,7 +92,7 @@ export default function Header({ view, setView, search, setSearch }) {
 
       <div style={{ flex: 1 }} />
 
-      {/* View toggle — segmented control */}
+      {/* View toggle */}
       <div style={{
         display: 'flex',
         background: 'rgba(0,0,0,0.25)',
@@ -99,7 +100,10 @@ export default function Header({ view, setView, search, setSearch }) {
         padding: 3,
         border: '1px solid rgba(255,255,255,0.08)',
       }}>
-        {[{ key: 'map', icon: <Map size={13} />, label: 'Karte' }, { key: 'list', icon: <List size={13} />, label: 'Liste' }].map(({ key, icon, label }) => (
+        {[
+          { key: 'map', icon: <Map size={13} />, label: 'Karte' },
+          { key: 'list', icon: <List size={13} />, label: 'Liste' },
+        ].map(({ key, icon, label }) => (
           <button
             key={key}
             onClick={() => setView(key)}

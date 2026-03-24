@@ -1,18 +1,22 @@
-import { AlertTriangle } from 'lucide-react'
+import {
+  AlertTriangle, Map, Hospital, Stethoscope,
+  Hammer, Scissors, Activity, Target,
+  Sparkles, Truck, Globe,
+} from 'lucide-react'
 
 const gold = '#C9A84C'
 
 const CATEGORY_ICONS = {
-  'Alle': '🗺️',
-  'Pferdeklinik': '🏥',
-  'Tierarzt': '⚕️',
-  'Hufschmied': '🔨',
-  'Sattler': '🪡',
-  'Reha / Therapie': '💆',
-  'Trainer': '🎯',
-  'Spezialangebot': '✨',
-  'Mobiler Notdienst': '🚑',
-  'Notfall-Netzwerk': '🌐',
+  'Alle':             <Map size={12} />,
+  'Pferdeklinik':     <Hospital size={12} />,
+  'Tierarzt':         <Stethoscope size={12} />,
+  'Hufschmied':       <Hammer size={12} />,
+  'Sattler':          <Scissors size={12} />,
+  'Reha / Therapie':  <Activity size={12} />,
+  'Trainer':          <Target size={12} />,
+  'Spezialangebot':   <Sparkles size={12} />,
+  'Mobiler Notdienst':<Truck size={12} />,
+  'Notfall-Netzwerk': <Globe size={12} />,
 }
 
 export default function FilterBar({ categories, active, setActive, onlyEmergency, setOnlyEmergency, count }) {
@@ -29,7 +33,7 @@ export default function FilterBar({ categories, active, setActive, onlyEmergency
       height: 48,
       scrollbarWidth: 'none',
     }}>
-      <style>{`::-webkit-scrollbar { display: none; }`}</style>
+      <style>{`.filterbar::-webkit-scrollbar { display: none; }`}</style>
 
       {categories.map(cat => {
         const isActive = active === cat
@@ -53,7 +57,7 @@ export default function FilterBar({ categories, active, setActive, onlyEmergency
               letterSpacing: 0.2,
             }}
           >
-            <span style={{ fontSize: 12 }}>{CATEGORY_ICONS[cat] || '•'}</span>
+            {CATEGORY_ICONS[cat]}
             {cat}
           </button>
         )
@@ -85,7 +89,7 @@ export default function FilterBar({ categories, active, setActive, onlyEmergency
         Nur Notfall
       </button>
 
-      {/* Count pill */}
+      {/* Count badge */}
       <div style={{
         background: 'rgba(255,255,255,0.06)',
         border: '1px solid rgba(255,255,255,0.08)',

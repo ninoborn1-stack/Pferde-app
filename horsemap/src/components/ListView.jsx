@@ -1,24 +1,23 @@
-import { Phone, Globe } from 'lucide-react'
+import {
+  Phone, Globe, MapPin, AlertOctagon, Clock, Truck,
+  Hospital, Stethoscope, Hammer, Scissors, Activity,
+  Target, Sparkles, Map,
+} from 'lucide-react'
+import { HorseshoeIcon } from './icons'
 
 const gold = '#C9A84C'
 const red = '#8B1A1A'
 
-const CATEGORY_COLORS = {
-  'Pferdeklinik': { bg: 'rgba(139,26,26,0.12)', color: '#E07070', border: 'rgba(139,26,26,0.25)' },
-  'Tierarzt': { bg: 'rgba(46,107,158,0.12)', color: '#6BAED6', border: 'rgba(46,107,158,0.25)' },
-  'Hufschmied': { bg: 'rgba(107,66,38,0.12)', color: '#C08050', border: 'rgba(107,66,38,0.25)' },
-  'Sattler': { bg: 'rgba(123,94,167,0.12)', color: '#A080CC', border: 'rgba(123,94,167,0.25)' },
-  'Reha / Therapie': { bg: 'rgba(46,139,87,0.12)', color: '#5EAD7A', border: 'rgba(46,139,87,0.25)' },
-  'Trainer': { bg: 'rgba(201,168,76,0.12)', color: '#C9A84C', border: 'rgba(201,168,76,0.25)' },
-  'Spezialangebot': { bg: 'rgba(74,107,139,0.12)', color: '#7AADD6', border: 'rgba(74,107,139,0.25)' },
-  'Mobiler Notdienst': { bg: 'rgba(192,57,43,0.12)', color: '#FF7070', border: 'rgba(192,57,43,0.25)' },
-  'Notfall-Netzwerk': { bg: 'rgba(192,57,43,0.12)', color: '#FF7070', border: 'rgba(192,57,43,0.25)' },
-}
-
-const CATEGORY_ICONS = {
-  'Pferdeklinik': '🏥', 'Tierarzt': '⚕️', 'Hufschmied': '🔨',
-  'Sattler': '🪡', 'Reha / Therapie': '💆', 'Trainer': '🎯',
-  'Spezialangebot': '✨', 'Mobiler Notdienst': '🚑', 'Notfall-Netzwerk': '🌐',
+const CATEGORY_STYLES = {
+  'Pferdeklinik':     { bg: 'rgba(139,26,26,0.1)',   color: '#E07070', border: 'rgba(139,26,26,0.2)',   Icon: Hospital },
+  'Tierarzt':         { bg: 'rgba(46,107,158,0.1)',  color: '#6BAED6', border: 'rgba(46,107,158,0.2)',  Icon: Stethoscope },
+  'Hufschmied':       { bg: 'rgba(107,66,38,0.1)',   color: '#C08050', border: 'rgba(107,66,38,0.2)',   Icon: Hammer },
+  'Sattler':          { bg: 'rgba(123,94,167,0.1)',  color: '#A080CC', border: 'rgba(123,94,167,0.2)',  Icon: Scissors },
+  'Reha / Therapie':  { bg: 'rgba(46,139,87,0.1)',   color: '#5EAD7A', border: 'rgba(46,139,87,0.2)',   Icon: Activity },
+  'Trainer':          { bg: 'rgba(201,168,76,0.1)',  color: '#C9A84C', border: 'rgba(201,168,76,0.2)',  Icon: Target },
+  'Spezialangebot':   { bg: 'rgba(74,107,139,0.1)',  color: '#7AADD6', border: 'rgba(74,107,139,0.2)',  Icon: Sparkles },
+  'Mobiler Notdienst':{ bg: 'rgba(192,57,43,0.1)',   color: '#FF7070', border: 'rgba(192,57,43,0.2)',   Icon: Truck },
+  'Notfall-Netzwerk': { bg: 'rgba(192,57,43,0.1)',   color: '#FF7070', border: 'rgba(192,57,43,0.2)',   Icon: Globe },
 }
 
 export default function ListView({ providers, selected, onSelect }) {
@@ -36,7 +35,9 @@ export default function ListView({ providers, selected, onSelect }) {
       }}>
         {providers.map(p => {
           const isSelected = selected?.id === p.id
-          const catStyle = CATEGORY_COLORS[p.category] || { bg: 'rgba(100,100,100,0.1)', color: '#999', border: 'rgba(100,100,100,0.2)' }
+          const cat = CATEGORY_STYLES[p.category] || { bg: 'rgba(100,100,100,0.1)', color: '#999', border: 'rgba(100,100,100,0.2)', Icon: Map }
+          const CatIcon = cat.Icon
+
           return (
             <div
               key={p.id}
@@ -70,16 +71,16 @@ export default function ListView({ providers, selected, onSelect }) {
                 position: 'absolute',
                 left: 0, top: 0, bottom: 0,
                 width: 3,
-                background: p.is_emergency ? '#E53E3E' : p.is_24h ? '#E67E22' : catStyle.color,
+                background: p.is_emergency ? '#E53E3E' : p.is_24h ? '#E67E22' : cat.color,
                 borderRadius: '14px 0 0 14px',
               }} />
 
-              {/* Top row: category + badges */}
+              {/* Category + badges */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
                 <span style={{
-                  background: catStyle.bg,
-                  color: catStyle.color,
-                  border: `1px solid ${catStyle.border}`,
+                  background: cat.bg,
+                  color: cat.color,
+                  border: `1px solid ${cat.border}`,
                   fontSize: 10,
                   fontWeight: 600,
                   padding: '2px 8px',
@@ -88,12 +89,12 @@ export default function ListView({ providers, selected, onSelect }) {
                   letterSpacing: 0.3,
                   display: 'flex', alignItems: 'center', gap: 4,
                 }}>
-                  <span>{CATEGORY_ICONS[p.category] || ''}</span>
+                  <CatIcon size={10} />
                   {p.category}
                 </span>
-                {p.is_emergency && <Badge color="#FF5555" bg="rgba(255,85,85,0.1)" border="rgba(255,85,85,0.2)" label="Notfall" />}
-                {p.is_24h && <Badge color="#E67E22" bg="rgba(230,126,34,0.1)" border="rgba(230,126,34,0.2)" label="24/7" />}
-                {p.mobile_service && <Badge color="#27AE60" bg="rgba(39,174,96,0.1)" border="rgba(39,174,96,0.2)" label="Mobil" />}
+                {p.is_emergency && <Badge color="#FF5555" bg="rgba(255,85,85,0.1)" border="rgba(255,85,85,0.2)" Icon={AlertOctagon} label="Notfall" />}
+                {p.is_24h && <Badge color="#E67E22" bg="rgba(230,126,34,0.1)" border="rgba(230,126,34,0.2)" Icon={Clock} label="24/7" />}
+                {p.mobile_service && <Badge color="#27AE60" bg="rgba(39,174,96,0.1)" border="rgba(39,174,96,0.2)" Icon={Truck} label="Mobil" />}
               </div>
 
               {/* Name */}
@@ -117,7 +118,7 @@ export default function ListView({ providers, selected, onSelect }) {
                 fontFamily: 'system-ui, -apple-system, sans-serif',
                 display: 'flex', alignItems: 'center', gap: 4,
               }}>
-                <span style={{ fontSize: 11 }}>📍</span>
+                <MapPin size={11} color="#bbb" />
                 {p.city}{p.region && p.region !== p.city ? ` · ${p.region}` : ''}
               </p>
 
@@ -153,7 +154,6 @@ export default function ListView({ providers, selected, onSelect }) {
                       borderRadius: 6,
                       padding: '4px 10px',
                       fontFamily: 'system-ui, -apple-system, sans-serif',
-                      transition: 'background 0.15s',
                     }}
                   >
                     <Phone size={10} /> Anrufen
@@ -175,19 +175,15 @@ export default function ListView({ providers, selected, onSelect }) {
                       borderRadius: 6,
                       padding: '4px 10px',
                       fontFamily: 'system-ui, -apple-system, sans-serif',
-                      transition: 'background 0.15s',
                     }}
                   >
                     <Globe size={10} /> Website
                   </a>
                 )}
                 <div style={{ flex: 1 }} />
-                <span style={{
-                  fontSize: 11,
-                  color: '#bbb',
-                  fontFamily: 'system-ui, -apple-system, sans-serif',
-                  alignSelf: 'center',
-                }}>Details →</span>
+                <span style={{ fontSize: 11, color: '#ccc', alignSelf: 'center', fontFamily: 'system-ui' }}>
+                  Details →
+                </span>
               </div>
             </div>
           )
@@ -198,11 +194,12 @@ export default function ListView({ providers, selected, onSelect }) {
         <div style={{
           textAlign: 'center',
           marginTop: 80,
-          color: '#aaa',
           fontFamily: 'system-ui, -apple-system, sans-serif',
         }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🐴</div>
-          <p style={{ fontSize: 15, fontWeight: 500, color: '#999' }}>Keine Anbieter gefunden</p>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+            <HorseshoeIcon size={52} color="#D4C9A8" />
+          </div>
+          <p style={{ fontSize: 15, fontWeight: 600, color: '#999' }}>Keine Anbieter gefunden</p>
           <p style={{ fontSize: 13, color: '#bbb', marginTop: 6 }}>Filter anpassen oder Suche zurücksetzen</p>
         </div>
       )}
@@ -210,11 +207,11 @@ export default function ListView({ providers, selected, onSelect }) {
   )
 }
 
-function Badge({ color, bg, border, label }) {
+function Badge({ color, bg, border, Icon, label }) {
   return (
     <span style={{
       background: bg,
-      color: color,
+      color,
       border: `1px solid ${border}`,
       fontSize: 10,
       fontWeight: 600,
@@ -222,7 +219,9 @@ function Badge({ color, bg, border, label }) {
       borderRadius: 6,
       fontFamily: 'system-ui, -apple-system, sans-serif',
       letterSpacing: 0.3,
+      display: 'flex', alignItems: 'center', gap: 3,
     }}>
+      {Icon && <Icon size={9} />}
       {label}
     </span>
   )
