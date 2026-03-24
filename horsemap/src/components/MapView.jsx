@@ -36,18 +36,24 @@ function TrackpadHandler() {
   useEffect(() => {
     const container = map.getContainer()
     const onWheel = (e) => {
-      // ctrlKey = pinch-to-zoom gesture on trackpad
+      e.preventDefault()
+
+      // ctrlKey = pinch-to-zoom on trackpad (macOS sends this for pinch)
       if (e.ctrlKey) {
-        e.preventDefault()
-        const zoom = map.getZoom() - e.deltaY * 0.02
-        map.setZoom(Math.max(1, Math.min(18, zoom)))
+        const delta = -e.deltaY / 100
+        map.setZoom(map.getZoom() + delta, { animate: false })
         return
       }
-      // horizontal or diagonal swipe = pan
-      if (Math.abs(e.deltaX) > 1 || Math.abs(e.deltaY) > 1) {
-        e.preventDefault()
+
+      // Primarily horizontal swipe OR diagonal → pan
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY) * 0.3) {
         map.panBy([e.deltaX, e.deltaY], { animate: false })
+        return
       }
+
+      // Pure vertical scroll → zoom (mouse wheel or trackpad vertical)
+      const zoomDelta = e.deltaMode === 1 ? -e.deltaY * 0.5 : -e.deltaY / 100
+      map.setZoom(map.getZoom() + zoomDelta, { animate: false })
     }
     container.addEventListener('wheel', onWheel, { passive: false })
     return () => container.removeEventListener('wheel', onWheel)
