@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.jsx'
 import { useDynamicProviders } from '../hooks/useDynamicProviders.jsx'
@@ -13,6 +13,11 @@ export default function ProfilePage() {
   const { services, slots, addService, updateService, removeService, toggleService, addSlot, removeSlot } = useDynamicProviders()
   const myService = services.find(s => s.ownerId === user?.id)
   const mySlots = slots.filter(s => s.ownerId === user?.id)
+
+  useEffect(() => {
+    document.body.style.background = '#000000'
+    return () => { document.body.style.background = '' }
+  }, [])
 
   const [activeTab, setActiveTab] = useState('uebersicht')
   const [editBio, setEditBio] = useState(false)
