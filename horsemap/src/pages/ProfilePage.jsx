@@ -224,7 +224,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Content */}
-      <div style={{ maxWidth: 860, margin: '0 auto', padding: '28px 24px' }}>
+      <div style={{ maxWidth: 860, margin: '0 auto', padding: '28px 24px', minHeight: '100vh', background: '#0f0a0a' }}>
 
         {/* ÜBERSICHT */}
         {activeTab === 'uebersicht' && (
@@ -654,7 +654,7 @@ export default function ProfilePage() {
 
 // Shared styles
 const cardStyle = {
-  background: 'rgba(255,255,255,0.04)',
+  background: '#1a1010',
   border: '1px solid rgba(255,255,255,0.07)',
   borderRadius: 16,
   padding: '20px',
