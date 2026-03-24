@@ -33,6 +33,15 @@ body {
 .leaflet-container {
   height: 100%;
   width: 100%;
+  touch-action: none;
+}
+
+.leaflet-grab {
+  cursor: grab;
+}
+
+.leaflet-dragging .leaflet-grab {
+  cursor: grabbing;
 }
 
 .leaflet-popup-content-wrapper {

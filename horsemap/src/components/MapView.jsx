@@ -89,8 +89,13 @@ export default function MapView({ providers, selected, onSelect }) {
       <MapContainer
         center={[52.52, 13.405]}
         zoom={9}
-        style={{ width: '100%', height: '100%' }}
+        style={{ width: '100%', height: '100%', touchAction: 'none' }}
         zoomControl={true}
+        dragging={true}
+        touchZoom={true}
+        scrollWheelZoom={true}
+        doubleClickZoom={true}
+        boxZoom={true}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
