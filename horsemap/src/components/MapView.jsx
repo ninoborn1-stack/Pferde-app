@@ -31,6 +31,30 @@ function FlyTo({ provider }) {
   return null
 }
 
+function TrackpadHandler() {
+  const map = useMap()
+  useEffect(() => {
+    const container = map.getContainer()
+    const onWheel = (e) => {
+      // ctrlKey = pinch-to-zoom gesture on trackpad
+      if (e.ctrlKey) {
+        e.preventDefault()
+        const zoom = map.getZoom() - e.deltaY * 0.02
+        map.setZoom(Math.max(1, Math.min(18, zoom)))
+        return
+      }
+      // horizontal or diagonal swipe = pan
+      if (Math.abs(e.deltaX) > 1 || Math.abs(e.deltaY) > 1) {
+        e.preventDefault()
+        map.panBy([e.deltaX, e.deltaY], { animate: false })
+      }
+    }
+    container.addEventListener('wheel', onWheel, { passive: false })
+    return () => container.removeEventListener('wheel', onWheel)
+  }, [map])
+  return null
+}
+
 function ProviderPopup({ p, onSelect }) {
   return (
     <div style={{ fontFamily: 'system-ui, -apple-system, sans-serif', minWidth: 195, padding: '2px 0' }}>
@@ -93,7 +117,7 @@ export default function MapView({ providers, selected, onSelect }) {
         zoomControl={true}
         dragging={true}
         touchZoom={true}
-        scrollWheelZoom={true}
+        scrollWheelZoom={false}
         doubleClickZoom={true}
         boxZoom={true}
       >
@@ -101,6 +125,7 @@ export default function MapView({ providers, selected, onSelect }) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <TrackpadHandler />
         {selected && <FlyTo provider={selected} />}
         {providers.map(p => (
           <Marker
